@@ -20,7 +20,7 @@ public class KafkaMessageConsumerService {
     @Autowired
     ObjectMapper objectMapper;
 
-    String dummyApiUrl = "http://localhost:1111/dummyapi";
+    String dummyApiUrl = "https://nx51np36-2707.inc1.devtunnels.ms/secured/apigateway/bulkapi";
 
     @KafkaListener(topics = "first")
     public void consumeMessage(String kafkaMessageJson) {
@@ -34,24 +34,24 @@ public class KafkaMessageConsumerService {
             System.out.println("receivedMessage "+receivedMessage);
 
             // Save message data to the database
-            MessageModel messageModel = new MessageModel(messageId, receivedMessage, null);
-            messageRepository.save(messageModel);
+//            MessageModel messageModel = new MessageModel(messageId, receivedMessage, null);
+//            messageRepository.save(messageModel);
 
             // Send message to external API and get response
             RestTemplate apiRestTemplate = new RestTemplate();
             String response = apiRestTemplate.postForObject(dummyApiUrl, receivedMessage, String.class);
 
             // Update the database with the API response
-            Optional<MessageModel> messageModelOptional = messageRepository.findById(messageId);
-            if(messageModelOptional.isPresent()) {
-                MessageModel messageModelToUpdate = messageModelOptional.get();
-                messageModelToUpdate.setResponse(response);
-                messageRepository.save(messageModelToUpdate);
+//            Optional<MessageModel> messageModelOptional = messageRepository.findById(messageId);
+//            if(messageModelOptional.isPresent()) {
+//                MessageModel messageModelToUpdate = messageModelOptional.get();
+//                messageModelToUpdate.setResponse(response);
+//                messageRepository.save(messageModelToUpdate);
 //                System.out.println("added message "+messageModelToUpdate.getResponse());
-            }
+//            }
 
         } catch (Exception e) {
-            System.err.println("Error processing Kafka message: " + kafkaMessageJson);
+//            System.err.println("Error processing Kafka message: " + kafkaMessageJson);
             e.printStackTrace();
         }
     }
