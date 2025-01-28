@@ -5,7 +5,7 @@ public class KafkaMessage {
     private String message;
     private String uuid;
 
-    public KafkaMessage(String uuid, String message) {
+    public KafkaMessage(String uuid, String message     ) {
         this.message = message;
         this.uuid = uuid;
     }

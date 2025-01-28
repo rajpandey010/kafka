@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Zookeeper Service
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - kafka-network
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper
+
+  # Kafka Broker Service
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092" # External access for testing/clients
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - kafka-network
+    volumes:
+      - kafka-data:/var/lib/kafka
+
+  # PostgreSQL Database Service
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_DB: categorymis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Postgre@123
+    ports:
+      - "5432:5432"
+    networks:
+      - kafka-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  # Producer Service (Spring Boot Microservice)
+  producer:
+    build: ./LeadowsKafka
+    container_name: producer
+    depends_on:
+      - kafka
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8080:8080"
+    networks:
+      - kafka-network
+
+  # Consumer Service (Spring Boot Microservice)
+  consumer:
+    build: ./Consumer_Project
+    container_name: consumer
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/categorymis
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Postgre@123
+      SPRING_KAFKA_CONSUMER_GROUP_ID: tempGroupId
+    ports:
+      - "2222:2222"
+    networks:
+      - kafka-network
+
+  # Node.js Application Service
+  node-app:
+    build:
+      context: ./node # Replace with the actual path to your Node.js app directory
+    container_name: node-app
+    depends_on:
+      - kafka
+      - postgres
+    environment:
+      KAFKA_BROKER_URL: kafka:9092
+      POSTGRES_URL: postgres://postgres:Postgre@123@postgres:5432/categorymis
+    ports:
+      - "3000:3000" # Map container port to host port
+    networks:
+      - kafka-network
+
+# Define Networks
+networks:
+  kafka-network:
+    driver: bridge
+
+# Define Volumes
+volumes:
+  zookeeper-data:
+  kafka-data:
+  postgres-data:

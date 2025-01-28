@@ -15,7 +15,7 @@ public class ConsoleApp {
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper objectMapper = new ObjectMapper(); // Jackson ObjectMapper for object to JSON conversion
 
-        for (int i = 1; i<10000; i++) {
+        for (int i = 1; i<50000; i++) {
             try {
                 // Construct the Message
                 Message message = new Message();
