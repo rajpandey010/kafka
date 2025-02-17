@@ -75,7 +75,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/categorymis
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: Postgre@123
-      SPRING_KAFKA_CONSUMER_GROUP_ID: tempGroupId
+      SPRING_KAFKA_CONSUMER_GROUP_ID: tempGroupId19
     ports:
       - "2222:2222"
     networks:
